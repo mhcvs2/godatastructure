@@ -1,6 +1,6 @@
 //Todo(mhc)
 //Go HashSet implemented via map
-package set
+package godatastructure
 
 import (
 	"bytes"
