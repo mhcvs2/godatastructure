@@ -2,136 +2,97 @@ package set
 
 import (
 	"testing"
-	"fmt"
+	"math/rand"
+	"time"
+	"bytes"
 )
 
-func New() (s1, s2 *HashSet) {
-	s1 = NewHashSet()
-	s1.Add("a")
-	s1.Add("b")
-	s1.Add("c")
-
-	s2 = NewHashSet()
-	s2.Add("d")
-	s2.Add("b")
-	s2.Add("c")
-	return s1, s2
-}
-
-func check(strs []string, set Set, t *testing.T) {
-	for _, i := range strs {
-		if !set.Contains(i) {
-			t.Errorf("set union shoule contain %s", i)
+func testSetLenAndContains(t *testing.T, newSet func() Set, typeName string) {
+	t.Logf("Starting Test%sLenAndContains...", typeName)
+	set, expectedElemMap := genRandSet(newSet)
+	t.Logf("Got a %s value: %v.", typeName, set)
+	expectedLen := len(expectedElemMap)
+	if set.Len() != expectedLen {
+		t.Errorf("ERROR： The length of %s value %d is not %d!\n",
+			set.Len(), typeName, expectedLen)
+		t.FailNow()
+	}
+	t.Logf("The length of %s value is %d.\n", typeName, set.Len())
+	for k := range expectedElemMap {
+		if !set.Contains(k) {
+			t.Errorf("ERROR: The %s value %v do not contains %v!",
+				set, typeName, k)
+			t.FailNow()
 		}
 	}
 }
 
-func ExampleIsSuperset() {
-	s1 := NewHashSet()
-	s1.Add("a")
-	fmt.Println(IsSuperset(s1, nil))
-	fmt.Println(IsSuperset(nil, nil))
-	s2 := NewHashSet()
-	fmt.Println(IsSuperset(s1, s2))
-	//Output:
-	//false
-	//false
-	//true
+
+//--gen rand function--
+func genRandSet(newSet func() Set) (set Set, elemMap map[interface{}]bool) {
+	set = newSet()
+	elemMap = make(map[interface{}]bool)
+	var enouth bool
+	for !enouth {
+		e := genRandElement()
+		set.Add(e)
+		elemMap[e] = true
+		if len(elemMap) >= 3 {
+			enouth = true
+		}
+	}
+	return
 }
 
-func ExampleIsSuperset2() {
-	s1, s2 := New()
-	fmt.Println(IsSuperset(s1, s2))
-	s1.Remove("a")
-	s2.Remove("d")
-	fmt.Println(IsSuperset(s1, s2))
-	s2.Remove("c")
-	fmt.Println(IsSuperset(s1, s2))
-	//Output:
-	//false
-	//false
-	//true
+func genRandElement() interface{} {
+	seed := rand.Int63n(10000)
+	switch seed {
+	case 0:
+		return genRandInt()
+	case 1:
+		return genRandString()
+	case 2:
+		return struct {
+			num int64
+			str string
+		}{genRandInt(), genRandString()}
+	default:
+		const length = 2
+		arr := new([length]interface{})
+		for i:=0; i<length; i++ {
+			if i%2 ==0 {
+				arr[i] = genRandInt()
+			} else {
+				arr[i] = genRandString()
+			}
+		}
+		return *arr
+	}
 }
 
-func TestUnion(t *testing.T) {
-	s1, s2 := New()
-	union := Union(s1, s2)
-	t.Log(union.String())
-	strs := []string{"a", "b", "c", "d"}
-	check(strs, union, t)
+func genRandString() string {
+	var buff bytes.Buffer
+	var prev string
+	var curr string
+	for i := 0; buff.Len() < 3; i++ {
+		curr = string(genRandAZAscii())
+		if curr == prev {
+			continue
+		} else {
+			prev = curr
+		}
+		buff.WriteString(curr)
+	}
+	return buff.String()
 }
 
-func ExampleUnion() {
-	s1 := NewHashSet()
-	s1.Add("a")
-	fmt.Println(Union(s1, nil))
-	fmt.Println(Union(nil, nil))
-	s2 := NewHashSet()
-	fmt.Println(Union(s1, s2))
-	//Output:
-	// Set{a}
-	//<nil>
-	//Set{a}
+func genRandAZAscii() int {
+	min := 65
+	max := 90
+	rand.Seed(time.Now().UnixNano())
+	return min + rand.Intn(max-min)
 }
 
-func TestIntersect(t *testing.T) {
-	s1, s2 := New()
-	intersect := Intersect(s1, s2)
-	t.Log(intersect.String())
-	strs := []string{"b", "c"}
-	check(strs, intersect, t)
-}
-
-func ExampleIntersect() {
-	s1 := NewHashSet()
-	s1.Add("a")
-	fmt.Println(Intersect(s1, nil))
-	fmt.Println(Intersect(nil, nil))
-	s2 := NewHashSet()
-	fmt.Println(Intersect(s1, s2))
-	//Output:
-	//<nil>
-	//<nil>
-	//<nil>
-}
-
-func ExampleDifference() {
-	s1 := NewHashSet()
-	s1.Add("a")
-	fmt.Println(Difference(s1, nil))
-	fmt.Println(Difference(nil, nil))
-	s2 := NewHashSet()
-	fmt.Println(Difference(s1, s2))
-	//Output:
-	//Set{a}
-	//<nil>
-	//Set{a}
-}
-
-func ExampleDifference2() {
-	s1, s2 := New()
-	fmt.Println(Difference(s1, s2))
-	//Output:
-	//Set{a}
-}
-
-func ExampleSummetricDifference() {
-	s1 := NewHashSet()
-	s1.Add("a")
-	fmt.Println(Difference(s1, nil))
-	fmt.Println(Difference(nil, nil))
-	s2 := NewHashSet()
-	fmt.Println(Difference(s1, s2))
-	//Output:
-	//Set{a}
-	//<nil>
-	//Set{a}
-}
-
-func TestSummetricDifference(t *testing.T) {
-	s1, s2 := New()
-	intersect := SummetricDifference(s1, s2)
-	t.Log(intersect.String())
-	strs := []string{"a", "d"}
-	check(strs, intersect, t)
+func genRandInt() int64 {
+	return rand.Int63n(10000)
 }

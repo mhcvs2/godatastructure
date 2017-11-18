@@ -138,3 +138,15 @@ func SummetricDifference(one Set, other Set) Set {
 	intersect := Intersect(one, other)
 	return Difference(union, intersect)
 }
+
+func NewSimpleSet() Set {
+	return NewHashSet()
+}
+
+func IsSet(value interface{}) bool {
+	if _, ok := value.(Set); ok {
+		return true
+	}
+	return false
+}
+
