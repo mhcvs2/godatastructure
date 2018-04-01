@@ -3,6 +3,7 @@
     <CLASSES>
       <root url="file://$PROJECT_DIR$/../../../myvolume" />
       <root url="file://$PROJECT_DIR$/../../../git.sec.samsung.net" />
+      <root url="file://$PROJECT_DIR$/../../../testops" />
       <root url="file://$PROJECT_DIR$/../../../natsTest" />
       <root url="file://$PROJECT_DIR$/../../../myapp" />
       <root url="file://$PROJECT_DIR$/../../../cobratest" />
@@ -24,6 +25,7 @@
     <SOURCES>
       <root url="file://$PROJECT_DIR$/../../../myvolume" />
       <root url="file://$PROJECT_DIR$/../../../git.sec.samsung.net" />
+      <root url="file://$PROJECT_DIR$/../../../testops" />
       <root url="file://$PROJECT_DIR$/../../../natsTest" />
       <root url="file://$PROJECT_DIR$/../../../myapp" />
       <root url="file://$PROJECT_DIR$/../../../cobratest" />
