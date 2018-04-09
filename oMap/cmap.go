@@ -7,8 +7,16 @@ import (
 	"sync"
 )
 
+//ConcurrentMap 加锁的线程安全的map
 type ConcurrentMap interface {
 	GenericMap
+}
+
+func NewConcurrentMap(keyType, elemType reflect.Type) ConcurrentMap {
+	return &myConcurrentMap{
+		keyType:  keyType,
+		elemType: elemType,
+		m:        make(map[interface{}]interface{})}
 }
 
 type myConcurrentMap struct {
@@ -136,11 +144,4 @@ func (cmap *myConcurrentMap) String() string {
 	}
 	buf.WriteString("}")
 	return buf.String()
-}
-
-func NewConcurrentMap(keyType, elemType reflect.Type) ConcurrentMap {
-	return &myConcurrentMap{
-		keyType:  keyType,
-		elemType: elemType,
-		m:        make(map[interface{}]interface{})}
 }
