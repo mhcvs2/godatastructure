@@ -6,14 +6,15 @@ import (
 	"os"
 	"github.com/mhcvs2/godatastructure/util"
 	"path/filepath"
+	"fmt"
 )
 
 const dataDir  = "/tmp/test/persist"
 
 func TestNewPersistence(t *testing.T) {
-	os.Remove(dataDir)
+	os.RemoveAll(dataDir)
 	NewPersistence(dataDir)
-	defer os.Remove(dataDir)
+	defer os.RemoveAll(dataDir)
 	a := assert.New(t)
 	exist, err := util.Exists(dataDir)
 	a.True(exist)
@@ -21,15 +22,16 @@ func TestNewPersistence(t *testing.T) {
 }
 
 type TestObject struct {
-	aa string
-	bb []string
+	Aa string
+	Bb []string
 }
 
 func TestPersistence_Save(t *testing.T) {
 	p := NewPersistence(dataDir)
+	defer os.RemoveAll(dataDir)
 	data := &TestObject{
-		aa : "mhc",
-		bb : []string{"hello", "world"},
+		Aa : "mhc",
+		Bb : []string{"hello", "world"},
 	}
 	a := assert.New(t)
 	key := "test"
@@ -41,6 +43,19 @@ func TestPersistence_Save(t *testing.T) {
 
 	data2 := &TestObject{}
 	p.Load(key, data2)
-	a.Equal(data2.aa, "mhc")
-	a.Equal(len(data2.bb), 2)
+	a.Equal(data2.Aa, "mhc")
+	a.Equal(len(data2.Bb), 2)
+}
+
+func ExamplePersistence_List() {
+	p := NewPersistence(dataDir)
+	defer os.RemoveAll(dataDir)
+	data := &TestObject{
+		Aa : "mhc",
+		Bb : []string{"hello", "world"},
+	}
+	p.Save("test1", data)
+	p.Save("test2", data)
+	fmt.Println(p.List())
+	//Output: [test1 test2]
 }
