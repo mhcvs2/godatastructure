@@ -1,4 +1,3 @@
-//Todo(mhc)
 //Go HashSet implemented via map
 package set
 
