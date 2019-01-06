@@ -45,8 +45,28 @@ func NewConductorWorker(baseUrl string, threadCount int, pollingInterval int) *C
 	return conductorWorker
 }
 
+func (c *ConductorWorker) unexpectErrHandler(taskData string){
+	if unexpectErr := recover(); unexpectErr != nil {
+		t, err := task.ParseTask(taskData)
+		if err != nil {
+			log.Println("Error Parsing task")
+			return
+		}
+		log.Println("Error Executing task, unexpect err: ", unexpectErr)
+		taskResult := task.NewFailedTaskResult(t)
+		taskResult.AppendToLogs(unexpectErr.(string))
+		taskResultJsonString, err := taskResult.ToJSONString()
+		if err != nil {
+			log.Println(err)
+			log.Println("Error Forming TaskResult JSON body, err: ", err.Error())
+			return
+		}
+		c.ConductorHttpClient.UpdateTask(taskResultJsonString)
+	}
+}
 
 func (c *ConductorWorker) Execute(taskData string, executeFunction func(t *task.Task) (*task.TaskResult, error)) {
+	defer c.unexpectErrHandler(taskData)
 	t, err := task.ParseTask(taskData)
 	if err != nil {
 		log.Println("Error Parsing task")
@@ -55,14 +75,15 @@ func (c *ConductorWorker) Execute(taskData string, executeFunction func(t *task.
 
 	taskResult, err := executeFunction(t)
 	if err != nil {
-		log.Println("Error Executing task")
-		return
+		log.Println("Error Executing task, err: ", err.Error())
+		taskResult = task.NewFailedTaskResult(t)
+		taskResult.AppendToLogs(err.Error())
 	}
 
 	taskResultJsonString, err := taskResult.ToJSONString()
 	if err != nil {
 		log.Println(err)
-		log.Println("Error Forming TaskResult JSON body")
+		log.Println("Error Forming TaskResult JSON body, err: ", err.Error())
 		return
 	}
 	c.ConductorHttpClient.UpdateTask(taskResultJsonString)

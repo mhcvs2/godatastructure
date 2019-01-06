@@ -27,12 +27,20 @@ type TaskResult struct {
 	CallbackAfterSeconds int64			`json:"callbackAfterSeconds"`
 	WorkerId string						`json:"workerId"`
 	OutputData map[string]interface{}	`json:"outputData"`
+	Logs []string                       `json:"logs"`
 }
 
 // "Constructor" to initialze non zero value defaults
 func NewEmptyTaskResult() *TaskResult {
 	taskResult := new(TaskResult)
 	taskResult.OutputData = make(map[string]interface{})
+	taskResult.Logs = []string{}
+	return taskResult
+}
+
+func NewFailedTaskResult(t *Task) *TaskResult {
+	taskResult := NewTaskResult(t)
+	taskResult.Status = FAILED
 	return taskResult
 }
 
@@ -45,7 +53,12 @@ func NewTaskResult(t *Task) *TaskResult {
 	taskResult.Status = TaskResultStatus(t.Status)
 	taskResult.WorkerId = t.WorkerId
 	taskResult.OutputData = t.OutputData
+	taskResult.Logs = []string{}
 	return taskResult
+}
+
+func (t *TaskResult) AppendToLogs(log string) {
+	t.Logs = append(t.Logs, log)
 }
 
 func (t *TaskResult) ToJSONString() (string, error) {

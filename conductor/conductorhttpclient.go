@@ -176,6 +176,17 @@ func (c *ConductorHttpClient) GetTask(taskId string) (string, error) {
     }
 }
 
+func (c *ConductorHttpClient) GetTaskLogs(taskId string) (string, error) {
+    url := c.httpClient.MakeUrl("/tasks/{taskId}/log", "{taskId}", taskId)
+    outputString, err := c.httpClient.Get(url, nil, nil)
+    if err != nil {
+        log.Println("Error while trying to Get Task", taskId, err)
+        return "", nil
+    } else {
+        return outputString, nil
+    }
+}
+
 func (c *ConductorHttpClient) UpdateTask(taskBody string) (string, error) {
     url := c.httpClient.MakeUrl("/tasks")
     outputString, err := c.httpClient.Post(url, nil, nil, taskBody)
