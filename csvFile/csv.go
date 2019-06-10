@@ -26,7 +26,7 @@ func (c *CSV) Init(initData ...string) error {
 		if c.writer != nil {
 			return nil
 		}
-		if f, err := os.OpenFile("/root/github/go/src/csv/test.csv", os.O_WRONLY, 0644); err !=nil {
+		if f, err := os.OpenFile(c.path, os.O_WRONLY, 0644); err !=nil {
 			return err
 		} else {
 			c.f = f
